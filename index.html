@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telethon 2025 APW - Prenotazione Turni</title>
+    <title>Telethon Udine 2025 - APW</title>
     <!-- Caricamento di Tailwind CSS per uno stile moderno e responsive -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -27,24 +27,16 @@
             color: white;
             font-weight: 700;
         }
-        .cell-available {
+        /* I turni occupati saranno sempre cliccabili per la modifica */
+        .cell-available, .cell-booked-info {
             cursor: pointer;
             transition: background-color 0.2s;
         }
         .cell-available:hover {
             background-color: #d1fae5; /* Smeraldo 100 */
         }
-        .cell-booked {
-            background-color: #fca5a5; /* Rosso 400 */
-            color: #7f1d1d; /* Rosso 900 */
-            font-weight: 600;
-        }
-        .cell-booked-info {
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
         .cell-booked-info:hover {
-            background-color: #fecaca; /* Rosso 200 */
+            background-color: #fef3c7; /* Giallo 100 per indicare modifica */
         }
     </style>
     <!-- Icone Lucide -->
@@ -58,7 +50,7 @@
                 <span class="text-emerald-500">TELETHON UDINE 2025 - SQUADRA APW</span>
             </h1>
             <p class="mt-2 text-center text-gray-600">Dalle ore 15.00 di SABATO 29 NOVEMBRE alle ore 15.00 di DOMENICA 30 NOVEMBRE</p>
-             <p id="user-id-display" class="mt-4 text-xs text-center text-gray-500">ID Utente: <span id="user-id-value" class="font-mono bg-gray-100 px-1 py-0.5 rounded">Accesso non effettuato.</span></p>
+             <!-- Rimosso l'elemento con l'ID utente -->
         </header>
 
         <!-- Area della Tabella -->
@@ -90,7 +82,7 @@
         <!-- Messaggio di benvenuto pre-login -->
         <div id="pre-login-message" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg shadow-lg mt-8 text-center" role="alert">
             <p class="font-bold">Accesso Obbligatorio</p>
-            <p>Per visualizzare e prenotare i turni, inserisci la password di accesso.</p>
+            <p>Per visualizzare e prenotare i turni, effettua l'accesso.</p>
         </div>
 
 
@@ -99,22 +91,16 @@
     </div>
     
     <!-- ========================================================================= -->
-    <!-- MODALE DI LOGIN (Password unica) -->
+    <!-- MODALE DI LOGIN -->
     <!-- ========================================================================= -->
     <div id="login-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm p-6 rounded-xl shadow-2xl transform transition-all scale-100" role="dialog" aria-modal="true" aria-labelledby="login-title">
-            <!-- TITOLO MODIFICATO -->
-            <h2 id="login-title" class="text-2xl font-bold mb-4 text-emerald-600">Inserisci la Password di Accesso</h2>
-            <p class="mb-4 text-sm text-gray-500">Questa password è condivisa con tutti i volontari.</p>
-
+            <h2 id="login-title" class="text-2xl font-bold mb-6 text-emerald-600">Accesso Iscrizioni</h2>
+            
             <form id="login-form">
-                <!-- Campo Email nascosto, usato solo da Firebase -->
-                <div class="mb-4 hidden">
-                    <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email (Fissa e Nascosta)</label>
-                    <input type="email" id="login-email" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" value="volontari@apw.it">
-                </div>
+                
                  <div class="mb-6">
-                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password Condivisa *</label>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password condivisa *</label>
                     <input type="password" id="login-password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
 
@@ -130,13 +116,12 @@
     </div>
     
     <!-- ========================================================================= -->
-    <!-- VECCHIE MODALI -->
+    <!-- MODALE DI PRENOTAZIONE/MODIFICA (Rimosso Dettagli, Modale unica) -->
     <!-- ========================================================================= -->
 
-    <!-- Modale di Prenotazione (Hidden by default) -->
     <div id="booking-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 hidden">
         <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-2xl transform transition-all scale-100" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-            <h2 id="modal-title" class="text-2xl font-bold mb-4 text-gray-800">Prenota il Turno <span id="modal-time-slot" class="text-emerald-500"></span></h2>
+            <h2 id="modal-title" class="text-2xl font-bold mb-4 text-gray-800">Prenota/Modifica Turno <span id="modal-time-slot" class="text-emerald-500"></span></h2>
 
             <form id="booking-form">
                 <div class="mb-4">
@@ -147,10 +132,11 @@
                     <label for="cognome" class="block text-sm font-medium text-gray-700 mb-1">Cognome *</label>
                     <input type="text" id="cognome" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
-                <!-- CAMPO: Data di Nascita -->
+                <!-- CAMPO: Data di Nascita (Con limitazioni min/max impostate da JS) -->
                 <div class="mb-4">
                     <label for="dataNascita" class="block text-sm font-medium text-gray-700 mb-1">Data di Nascita *</label>
                     <input type="date" id="dataNascita" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    <p id="dataNascita-error" class="text-red-500 text-xs mt-1 hidden">L'anno deve essere compreso tra il 1930 e il 2025.</p>
                 </div>
                 <!-- FINE CAMPO -->
                 <div class="mb-4">
@@ -172,26 +158,11 @@
                 </div>
             </form>
 
-            <!-- Pulsante di Cancellazione (mostrato solo se l'utente attuale ha prenotato il turno) -->
+            <!-- Pulsante di Cancellazione (sempre visibile se il turno è occupato) -->
             <button id="delete-booking-btn" class="mt-4 w-full px-4 py-2 text-sm font-medium text-red-600 bg-red-100 rounded-lg hover:bg-red-200 transition hidden">
                 <span data-lucide="trash-2" class="w-4 h-4 inline-block mr-2"></span>
-                Cancella la mia prenotazione
+                Cancella la prenotazione
             </button>
-        </div>
-    </div>
-
-    <!-- Modale Dettagli Volontario (Hidden by default) -->
-    <div id="details-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 hidden">
-        <div class="bg-white w-full max-w-sm p-6 rounded-xl shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="details-title">
-            <h2 id="details-title" class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">Dettagli Volontario</h2>
-            <div id="details-content" class="space-y-3 text-gray-700">
-                <!-- I dettagli saranno iniettati qui -->
-            </div>
-            <div class="flex justify-end mt-6">
-                <button type="button" id="close-details-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    Chiudi
-                </button>
-            </div>
         </div>
     </div>
 
@@ -223,15 +194,15 @@
             appId: "1:592976367283:web:b773f920dc78da823d6ac6"
         };
         
-        // EMAIL FISSA: Questa email sarà usata per tutti i login. Deve esistere in Firebase Auth.
-        const SHARED_EMAIL = 'volontari@apw.it';
+        // 3. Email fissa per l'accesso condiviso dei volontari
+        const SHARED_VOLUNTEER_EMAIL = 'volontari@apw.it';
         
         // ==============================================================================
         // ==============================================================================
 
         let db, auth, currentUserId = null, isAuthReady = false;
         
-        // Dati iniziali (dalle fasce orarie del tuo file CSV)
+        // Dati iniziali (fasce orarie)
         const initialTimeSlots = [
             "15-16", "16-17", "17-18", "18-19", "19-20", "20-21", "21-22", "22-23", 
             "23-24", "24-1", "1-2", "2-3", "3-4", "4-5", "5-6", "6-7", "7-8", 
@@ -250,7 +221,6 @@
         
         const scheduleBody = document.getElementById('schedule-body');
         const bookingModal = document.getElementById('booking-modal');
-        const detailsModal = document.getElementById('details-modal');
         const bookingForm = document.getElementById('booking-form');
         const modalTimeSlot = document.getElementById('modal-time-slot');
         const saveBookingBtn = document.getElementById('save-booking-btn');
@@ -258,8 +228,20 @@
         const loadingIndicator = document.getElementById('loading-indicator');
         const errorMessage = document.getElementById('error-message');
         const statusMessage = document.getElementById('status-message');
-
+        const dataNascitaInput = document.getElementById('dataNascita');
+        const dataNascitaError = document.getElementById('dataNascita-error');
+        
         let selectedSlotDocId = null;
+
+        // --- Variabili di Validazione Data ---
+        // Limiti basati sull'anno 2025 (prossimo evento) e 1930 (limite storico ragionevole)
+        const MIN_DATE = '1930-01-01';
+        const MAX_DATE = (new Date()).toISOString().split('T')[0]; // Data di oggi come limite massimo
+
+        // Imposta i limiti sull'input della data
+        dataNascitaInput.setAttribute('min', MIN_DATE);
+        dataNascitaInput.setAttribute('max', MAX_DATE);
+
 
         // --- Funzioni di Utilità ---
 
@@ -280,8 +262,9 @@
             scheduleBody.classList.toggle('opacity-50', show);
         }
         
+        // LOGICA MODIFICATA: L'APERTURA della modale non è più basata sulla proprietà utente,
+        // ma solo sullo stato occupato/libero e l'utente può sempre modificare.
         function openModal(docId, timeSlot) {
-            // Controlla l'autenticazione prima di aprire la modale
             if (!currentUserId) {
                  showStatus("Devi prima accedere per prenotare un turno.", true);
                  return;
@@ -292,30 +275,27 @@
 
             const slotData = currentSchedule[docId];
             
-            // Pulisci il form
             bookingForm.reset();
+            dataNascitaError.classList.add('hidden');
             deleteBookingBtn.classList.add('hidden');
             saveBookingBtn.textContent = 'Prenota Ora';
             saveBookingBtn.disabled = false;
 
-            // Controlla se il turno è già occupato
             if (slotData && slotData.nome) {
-                // Se occupato, controlla se è stato prenotato dall'utente corrente
-                if (slotData.userId === currentUserId) {
-                    // Pre-compila con i dati dell'utente per l'eventuale modifica
-                    document.getElementById('nome').value = slotData.nome || '';
-                    document.getElementById('cognome').value = slotData.cognome || '';
-                    document.getElementById('dataNascita').value = slotData.dataNascita || ''; 
-                    document.getElementById('telefono').value = slotData.telefono || '';
-                    document.getElementById('email').value = slotData.email || '';
-                    
-                    saveBookingBtn.textContent = 'Aggiorna Dati';
-                    deleteBookingBtn.classList.remove('hidden');
-                } else {
-                    // Se occupato da un altro utente, apri la modale di dettaglio invece di quella di prenotazione
-                    openDetailsModal(slotData);
-                    return; // Interrompi l'apertura della modale di prenotazione
-                }
+                // Pre-compila i dati se il turno è occupato
+                document.getElementById('nome').value = slotData.nome || '';
+                document.getElementById('cognome').value = slotData.cognome || '';
+                document.getElementById('dataNascita').value = slotData.dataNascita || ''; 
+                document.getElementById('telefono').value = slotData.telefono || '';
+                document.getElementById('email').value = slotData.email || '';
+                
+                saveBookingBtn.textContent = 'Aggiorna Dati';
+                deleteBookingBtn.classList.remove('hidden');
+                
+            } else {
+                // Se libero, resetta i campi per la nuova prenotazione
+                saveBookingBtn.textContent = 'Prenota Ora';
+                deleteBookingBtn.classList.add('hidden');
             }
             
             bookingModal.classList.remove('hidden');
@@ -326,27 +306,13 @@
             selectedSlotDocId = null;
         }
 
-        function openDetailsModal(slotData) {
-            const content = document.getElementById('details-content');
-            content.innerHTML = `
-                <p><strong class="font-semibold">Nome:</strong> ${slotData.nome || 'N/D'} ${slotData.cognome || ''}</p>
-                <p><strong class="font-semibold">Data di Nascita:</strong> ${slotData.dataNascita || 'N/D'}</p>
-                <p><strong class="font-semibold">Telefono:</strong> ${slotData.telefono || 'N/D'}</p>
-                <p><strong class="font-semibold">Email:</strong> ${slotData.email || 'N/D'}</p>
-            `;
-            detailsModal.classList.remove('hidden');
-        }
-
-        function closeDetailsModal() {
-            detailsModal.classList.add('hidden');
-        }
         
-        // --- NUOVA Funzione di Login (usa email fissa) ---
+        // --- Funzione di Login con password condivisa ---
         async function handleLogin(e) {
             e.preventDefault();
             
-            // Usa l'email fissa definita nel codice
-            const email = SHARED_EMAIL; 
+            // L'email è fissa e condivisa
+            const email = SHARED_VOLUNTEER_EMAIL; 
             const password = document.getElementById('login-password').value;
             const loginBtn = document.getElementById('login-btn');
             
@@ -354,27 +320,23 @@
             loginBtn.disabled = true;
 
             try {
-                // Esegui il login con email fissa e password inserita
+                // Tentativo di accesso con email fissa e password condivisa
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                
-                // Se ha successo, onAuthStateChanged si occuperà del resto (chiamando onLoginSuccess)
                 loginModal.classList.add('hidden');
                 showStatus("Accesso effettuato con successo!");
                 
             } catch (error) {
                 console.error("Errore di accesso:", error);
-                // Il messaggio di errore è ora più generico (solo "Password non valida")
-                loginErrorMsg.textContent = "Password non valida. Riprova. (Codice: " + error.code + ")";
+                loginErrorMsg.textContent = "Password non valida. Riprova.";
                 loginErrorMsg.classList.remove('hidden');
                 loginBtn.disabled = false;
             }
         }
         
         function onLoginSuccess(user) {
-            currentUserId = user.uid;
-            document.getElementById('user-id-value').textContent = currentUserId;
+            // Poiché l'account è condiviso, currentUserId sarà sempre lo stesso
+            currentUserId = user.uid; 
             
-            // Mostra la tabella e nascondi il messaggio pre-login/modale di login
             scheduleContainer.classList.remove('hidden');
             preLoginMessage.classList.add('hidden');
             loginModal.classList.add('hidden');
@@ -389,7 +351,6 @@
 
         function onLogout() {
             currentUserId = null;
-            document.getElementById('user-id-value').textContent = "Accesso non effettuato.";
             scheduleContainer.classList.add('hidden');
             preLoginMessage.classList.remove('hidden');
             loginModal.classList.remove('hidden');
@@ -410,7 +371,6 @@
                 auth = getAuth(app);
                 db = getFirestore(app);
                 
-                // 1. Imposta l'ascoltatore sullo stato di autenticazione
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         onLoginSuccess(user);
@@ -428,16 +388,11 @@
 
         // --- Funzioni di Interazione con Firestore ---
         
-        // Collezione pubblica: /artifacts/{appId}/public/data/time_slots
         function getTimeSlotsCollection() {
              return collection(db, 'artifacts', appId, 'public', 'data', 'time_slots');
         }
 
-        /**
-         * Assicura che esista un documento per ogni fascia oraria iniziale se non esiste.
-         */
         async function setupInitialSlots() {
-             // Il controllo dell'autenticazione è implicito da onAuthStateChanged
              if (!db || !currentUserId) {
                  return; 
              }
@@ -453,7 +408,6 @@
                         const slotDoc = await transaction.get(docRef);
 
                         if (!slotDoc.exists()) {
-                            // Se il documento non esiste, crealo con i dati di default (slot libero)
                             transaction.set(docRef, {
                                 timeSlot: slot,
                                 nome: null,
@@ -467,29 +421,21 @@
                     });
                 });
                 await Promise.all(setupPromises);
-                console.log("Setup iniziale degli slot completato.");
 
              } catch (e) {
-                // Se l'utente non ha i permessi, l'errore appare qui
                 console.error("Errore durante il setup degli slot iniziali (Probabile errore di permessi):", e);
                 showStatus("Errore durante l'inizializzazione degli orari. Controlla le regole di sicurezza di Firestore.", true);
                 errorMessage.textContent = "Errore: Impossibile creare gli slot iniziali. Controlla le regole di sicurezza (Permesso negato).";
                 errorMessage.classList.remove('hidden');
-             } finally {
-                 // Non togliere il loading qui, onSnapshot lo farà una volta ricevuti i dati
-             }
+             } 
         }
 
-        /**
-         * Avvia l'ascolto in tempo reale dei turni.
-         */
         function startListeningToSchedule() {
             if (!db) return;
             toggleLoading(true);
 
             const q = query(getTimeSlotsCollection());
             
-            // onSnapshot gestisce l'aggiornamento in tempo reale
             onSnapshot(q, (snapshot) => {
                 const newSchedule = {};
                 snapshot.forEach((doc) => {
@@ -498,7 +444,7 @@
                 
                 currentSchedule = newSchedule;
                 renderScheduleTable(newSchedule);
-                toggleLoading(false); // Nasconde l'indicatore solo dopo aver ricevuto il primo set di dati
+                toggleLoading(false); 
 
             }, (error) => {
                 console.error("Errore nell'ascolto dei dati:", error);
@@ -507,13 +453,19 @@
                 toggleLoading(false);
             });
             
-            // Esegui il setup iniziale subito dopo aver avviato l'ascolto
             setupInitialSlots();
         }
+        
+        // Funzione di validazione data
+        function validateDateOfBirth(dateStr) {
+            const date = new Date(dateStr);
+            const min = new Date(MIN_DATE);
+            const max = new Date(MAX_DATE);
+            
+            // Controlla se l'input è valido e rientra nei limiti
+            return dateStr && date >= min && date <= max;
+        }
 
-        /**
-         * Gestisce la prenotazione o l'aggiornamento di un turno.
-         */
         async function saveBooking(e) {
             e.preventDefault();
             
@@ -524,15 +476,22 @@
 
             const nome = document.getElementById('nome').value.trim();
             const cognome = document.getElementById('cognome').value.trim();
-            const dataNascita = document.getElementById('dataNascita').value.trim(); 
+            const dataNascita = dataNascitaInput.value.trim(); 
             const telefono = document.getElementById('telefono').value.trim();
             const email = document.getElementById('email').value.trim(); 
             
-            // Controllo di validazione: tutti i campi sono obbligatori
             if (!nome || !cognome || !dataNascita || !telefono || !email) {
                 showStatus("Per favore, compila tutti i campi obbligatori.", true);
                 return;
             }
+
+            // Validazione aggiunta per la data di nascita
+            if (!validateDateOfBirth(dataNascita)) {
+                dataNascitaError.classList.remove('hidden');
+                showStatus("Errore: la data di nascita inserita non è valida.", true);
+                return;
+            }
+            dataNascitaError.classList.add('hidden'); // Nasconde l'errore se la validazione va a buon fine
 
             saveBookingBtn.disabled = true;
 
@@ -544,43 +503,40 @@
                     const slotDoc = await transaction.get(slotRef);
                     const slotData = slotDoc.data();
 
-                    // Verifica se lo slot è libero O se è già stato prenotato da me (per l'aggiornamento)
-                    if (!slotData || !slotData.userId || slotData.userId === currentUserId) {
-                        transaction.set(slotRef, {
-                            timeSlot: timeSlotName,
-                            nome: nome,
-                            cognome: cognome,
-                            dataNascita: dataNascita, 
-                            telefono: telefono,
-                            email: email, 
-                            userId: currentUserId 
-                        });
-                        
-                        showStatus("Prenotazione/Aggiornamento turno effettuato con successo!");
-                        closeModal();
-                    } else {
-                        // Slot occupato da un altro utente
-                        showStatus("Errore: La fascia oraria è stata appena prenotata da un altro utente.", true);
-                        throw new Error("Slot occupato");
-                    }
+                    // Non c'è più il controllo di proprietà. Chiunque autenticato può prenotare/aggiornare.
+                    transaction.set(slotRef, {
+                        timeSlot: timeSlotName,
+                        nome: nome,
+                        cognome: cognome,
+                        dataNascita: dataNascita, 
+                        telefono: telefono,
+                        email: email, 
+                        // Manteniamo l'ID utente per coerenza dei dati, ma non viene usato per l'autorizzazione
+                        userId: currentUserId 
+                    });
+                    
+                    showStatus("Prenotazione/Aggiornamento turno effettuato con successo!");
+                    closeModal();
+                    
                 });
                 
             } catch (e) {
                 console.error("Errore nella transazione di salvataggio/aggiornamento:", e);
-                if (e.message !== "Slot occupato") {
-                    showStatus("Errore di rete o di sistema. Riprova. Dettagli in console.", true);
-                }
+                // Rimosso il controllo "Slot occupato" perché la transazione ora permette l'overwrite
+                showStatus("Errore di rete o di sistema. Riprova. Dettagli in console.", true);
+                
             } finally {
                 saveBookingBtn.disabled = false;
             }
         }
 
-        /**
-         * Gestisce la cancellazione di un turno.
-         */
         async function deleteBooking() {
             if (!selectedSlotDocId || !db || !currentUserId) return;
 
+            // Chiedi conferma all'utente (simulazione)
+            // Poiché non possiamo usare `confirm()`, procediamo direttamente come richiesto.
+            // In un'app reale si userebbe un modale di conferma.
+            
             deleteBookingBtn.disabled = true;
             
             const slotRef = doc(getTimeSlotsCollection(), selectedSlotDocId);
@@ -591,9 +547,8 @@
                     const slotDoc = await transaction.get(slotRef);
                     const slotData = slotDoc.data();
 
-                    // Controlla che il turno sia stato prenotato dall'utente corrente
-                    if (slotData && slotData.userId === currentUserId) {
-                        // Resetta il documento per renderlo libero
+                    // Se lo slot è occupato (da chiunque), lo si può cancellare (come richiesto)
+                    if (slotData && slotData.nome) {
                         transaction.set(slotRef, {
                             timeSlot: timeSlotName,
                             nome: null,
@@ -601,21 +556,21 @@
                             dataNascita: null, 
                             telefono: null,
                             email: null,
-                            userId: null
+                            userId: null // Resetta anche l'ID utente
                         });
                         
                         showStatus("Prenotazione annullata con successo.");
                         closeModal();
                     } else {
-                        // Se non è più prenotato dall'utente o è già libero
-                        showStatus("Errore: Non puoi cancellare questo turno.", true);
-                        throw new Error("Non autorizzato o slot già libero");
+                        // Se è già libero, non fare nulla e mostra un messaggio
+                         showStatus("Errore: Il turno risulta già libero.", true);
+                         throw new Error("Slot già libero");
                     }
                 });
                 
             } catch (e) {
-                console.error("Errore nella transazione di cancellazione:", e);
-                if (e.message !== "Non autorizzato o slot già libero") {
+                if (e.message !== "Slot già libero") {
+                    console.error("Errore nella transazione di cancellazione:", e);
                     showStatus("Errore di rete o di sistema durante la cancellazione. Riprova. Dettagli in console.", true);
                 }
             } finally {
@@ -625,42 +580,29 @@
 
         // --- Rendering e Logica UI ---
         
-        /**
-         * Renderizza la tabella con i dati aggiornati.
-         */
         function renderScheduleTable(schedule) {
             scheduleBody.innerHTML = '';
             
-            // Ordina gli slot in base all'ordine iniziale
             const sortedSlots = initialTimeSlots
                 .map(slotName => schedule[slotName])
                 .filter(slot => slot); 
 
             sortedSlots.forEach(slot => {
                 const isBooked = !!slot.nome;
-                const isMine = isBooked && slot.userId === currentUserId;
                 
                 const tr = document.createElement('tr');
+                // Tutti i turni (liberi o occupati) sono trattati come cliccabili per la prenotazione/modifica
                 tr.className = `border-b border-gray-100 transition duration-150 ${isBooked ? 'cell-booked-info' : 'cell-available hover:shadow-md'}`;
                 
-                // Gestione click sulla riga
-                if (isBooked) {
-                    // Se prenotato: apre i dettagli. Se è mio, apre la modale di modifica/cancellazione
-                    tr.onclick = isMine 
-                        ? () => openModal(slot.id, slot.timeSlot)
-                        : () => openDetailsModal(slot);
-                } else {
-                    // Se libero: apre la modale di prenotazione
-                    tr.onclick = () => openModal(slot.id, slot.timeSlot);
-                }
+                tr.onclick = () => openModal(slot.id, slot.timeSlot); // Apri sempre la modale
+
                 
-                // Contenuto della riga
                 const availabilityText = isBooked 
                     ? `<span class="inline-flex items-center text-red-700"><span data-lucide="lock" class="w-4 h-4 mr-1"></span> Occupato</span>`
                     : `<span class="inline-flex items-center text-emerald-700"><span data-lucide="check-circle" class="w-4 h-4 mr-1"></span> LIBERO</span>`;
                     
                 const volunteerName = isBooked 
-                    ? `<span class="${isMine ? 'text-emerald-800 font-bold' : 'text-gray-800'}">${slot.nome} ${slot.cognome || ''} ${isMine ? ' (TUO)' : ''}</span>`
+                    ? `<span class="text-gray-800">${slot.nome} ${slot.cognome || ''}</span>`
                     : `<span class="text-gray-400 italic">Clicca per prenotare</span>`;
 
                 tr.innerHTML = `
@@ -675,19 +617,16 @@
                 scheduleBody.appendChild(tr);
             });
             
-            // Inizializza le icone lucide dopo aver aggiornato l'innerHTML
             lucide.createIcons();
         }
 
         // --- Event Listeners ---
 
         document.getElementById('close-modal-btn').addEventListener('click', closeModal);
-        document.getElementById('close-details-btn').addEventListener('click', closeDetailsModal);
         
         bookingForm.addEventListener('submit', saveBooking);
         deleteBookingBtn.addEventListener('click', deleteBooking);
         
-        // Listener per il Login con Sola Password
         loginForm.addEventListener('submit', handleLogin);
         
         // Inizializza l'applicazione all'avvio
@@ -695,5 +634,3 @@
     </script>
 </body>
 </html>
-
-
