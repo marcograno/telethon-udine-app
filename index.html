@@ -164,25 +164,29 @@
         // Imposta il livello di log (utile per il debug)
         setLogLevel('Debug');
 
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+        // ==============================================================================
+        // ==============================================================================
+        // INIZIO CONFIGURAZIONE FIREBASE ESTERNA (OBBLIGATORIA)
+        // DATI REALI INSERITI
+        
+        // 1. Definisci il tuo App ID e il tuo userId per il nome della collezione (deve essere lo stesso per tutti gli utenti)
+        const appId = 'telethon-udine-2025'; // NON CAMBIARE QUESTO NOME PER L'APP
+        
+        // 2. Incolla qui il tuo oggetto di configurazione Firebase completo:
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkMMRNj0YD1D3cS1C6qjgBQSrBB8JhZTc",
+            authDomain: "telethon-dc081.firebaseapp.com",
+            projectId: "telethon-dc081",
+            storageBucket: "telethon-dc081.firebasestorage.app",
+            messagingSenderId: "592976367283",
+            appId: "1:592976367283:web:b773f920dc78da823d6ac6"
+        };
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyAkMMRNj0YD1D3cS1C6qjgBQSrBB8JhZTc",
-    authDomain: "telethon-dc081.firebaseapp.com",
-    projectId: "telethon-dc081",
-    storageBucket: "telethon-dc081.firebasestorage.app",
-    messagingSenderId: "592976367283",
-    appId: "1:592976367283:web:b773f920dc78da823d6ac6"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
+        // Rimuovi il codice del token di autenticazione dinamico (non serve più)
+        const initialAuthToken = null; 
+        
+        // ==============================================================================
+        // ==============================================================================
 
         let db, auth, currentUserId = null, isAuthReady = false;
         
@@ -432,7 +436,7 @@
             const email = document.getElementById('email').value.trim() || null;
             
             if (!nome || !cognome || !dataNascita || !telefono) {
-                showStatus("Per favore, compila tutti i campi obbligatori.", true);
+                showStatus("Per favor, compila tutti i campi obbligatori.", true);
                 return;
             }
 
