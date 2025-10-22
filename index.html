@@ -157,7 +157,7 @@
     <script type="module">
         // Importa le funzioni necessarie di Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, query, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
@@ -167,12 +167,11 @@
         // ==============================================================================
         // ==============================================================================
         // INIZIO CONFIGURAZIONE FIREBASE ESTERNA (OBBLIGATORIA)
-        // DATI REALI INSERITI
         
-        // 1. Definisci il tuo App ID e il tuo userId per il nome della collezione (deve essere lo stesso per tutti gli utenti)
-        const appId = 'telethon-udine-2025'; // NON CAMBIARE QUESTO NOME PER L'APP
+        // 1. Definisci il tuo App ID (DEVE essere il Project ID di Firebase per le collezioni pubbliche)
+        const appId = 'telethon-dc081'; // ID del progetto Firebase
         
-        // 2. Incolla qui il tuo oggetto di configurazione Firebase completo:
+        // 2. Oggetto di configurazione Firebase completo:
         const firebaseConfig = {
             apiKey: "AIzaSyAkMMRNj0YD1D3cS1C6qjgBQSrBB8JhZTc",
             authDomain: "telethon-dc081.firebaseapp.com",
@@ -181,7 +180,7 @@
             messagingSenderId: "592976367283",
             appId: "1:592976367283:web:b773f920dc78da823d6ac6"
         };
-
+        
         // Rimuovi il codice del token di autenticazione dinamico (non serve più)
         const initialAuthToken = null; 
         
@@ -234,6 +233,12 @@
         }
         
         function openModal(docId, timeSlot) {
+            // Controlla l'autenticazione prima di aprire la modale
+            if (!currentUserId) {
+                 showStatus("Autenticazione in corso, attendi...", true);
+                 return;
+            }
+
             selectedSlotDocId = docId;
             modalTimeSlot.textContent = timeSlot;
 
@@ -252,17 +257,16 @@
                     // Pre-compila con i dati dell'utente per l'eventuale modifica
                     document.getElementById('nome').value = slotData.nome || '';
                     document.getElementById('cognome').value = slotData.cognome || '';
-                    document.getElementById('dataNascita').value = slotData.dataNascita || ''; // NUOVO CAMPO
+                    document.getElementById('dataNascita').value = slotData.dataNascita || ''; 
                     document.getElementById('telefono').value = slotData.telefono || '';
                     document.getElementById('email').value = slotData.email || '';
                     
                     saveBookingBtn.textContent = 'Aggiorna Dati';
                     deleteBookingBtn.classList.remove('hidden');
                 } else {
-                    // Turno occupato da un altro utente. NON dovrebbe succedere cliccando sulla riga,
-                    // ma lo gestiamo per sicurezza.
-                    showStatus("Errore: il turno è già occupato da un altro utente.", true);
-                    return;
+                    // Se occupato da un altro utente, apri la modale di dettaglio invece di quella di prenotazione
+                    openDetailsModal(slotData);
+                    return; // Interrompi l'apertura della modale di prenotazione
                 }
             }
             
@@ -292,10 +296,9 @@
         // --- Funzioni di Inizializzazione Firebase ---
 
         async function initFirebase() {
-            // Controlla che i dati di configurazione siano stati inseriti
             if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey === "IL_TUO_API_KEY") {
                 console.error("Firebase config mancante o con placeholder.");
-                errorMessage.textContent = "Configurazione Firebase mancante. Inserisci le tue chiavi nel file index.html per avviare l'app.";
+                errorMessage.textContent = "Configurazione Firebase mancante.";
                 errorMessage.classList.remove('hidden');
                 return;
             }
@@ -305,34 +308,29 @@
                 auth = getAuth(app);
                 db = getFirestore(app);
                 
-                // Gestione autenticazione
-                onAuthStateChanged(auth, async (user) => {
+                // 1. Forza l'autenticazione anonima immediatamente
+                const userCredential = await signInAnonymously(auth);
+                currentUserId = userCredential.user.uid;
+                document.getElementById('user-id-value').textContent = currentUserId;
+                
+                // 2. Imposta l'ascoltatore sullo stato di autenticazione per sicurezza futura, 
+                // ma procedi subito con i dati dato che l'autenticazione è avvenuta.
+                onAuthStateChanged(auth, (user) => {
                     if (user) {
                         currentUserId = user.uid;
-                    } else {
-                        // Per l'hosting esterno usiamo solo l'autenticazione anonima
-                        await signInAnonymously(auth).catch(e => {
-                            console.error("Errore con signInAnonymously:", e);
-                        });
                     }
-                    
-                    // Se l'autenticazione è fallita, currentUserId rimarrà null o non aggiornato, ma gestiamo la visualizzazione
-                    document.getElementById('user-id-value').textContent = currentUserId || 'Anonimo';
-                    isAuthReady = true;
-
-                    // Una volta autenticato, avvia l'ascolto dei dati
-                    if (db) {
-                        startListeningToSchedule();
-                    } else {
-                        console.error("Firestore non inizializzato.");
-                        errorMessage.textContent = "Errore di inizializzazione Firestore.";
-                        errorMessage.classList.remove('hidden');
+                    // isAuthReady viene settato dopo l'autenticazione iniziale anonima
+                    if (!isAuthReady) {
+                        isAuthReady = true;
+                        if (db) {
+                            startListeningToSchedule();
+                        }
                     }
                 });
 
             } catch (e) {
                 console.error("Errore fatale nell'inizializzazione di Firebase:", e);
-                errorMessage.textContent = "Errore fatale nell'inizializzazione: " + e.message;
+                errorMessage.textContent = "Errore di connessione o autenticazione Firebase: " + e.message;
                 errorMessage.classList.remove('hidden');
             }
         }
@@ -346,11 +344,9 @@
 
         /**
          * Assicura che esista un documento per ogni fascia oraria iniziale se non esiste.
-         * Lo fa in modo sicuro tramite un'unica transazione.
          */
         async function setupInitialSlots() {
-             // Non esegue se il database non è pronto
-             if (!db || !isAuthReady) return;
+             if (!db || !currentUserId) return; // Non esegue se non autenticato
              
              toggleLoading(true);
 
@@ -368,7 +364,7 @@
                                 timeSlot: slot,
                                 nome: null,
                                 cognome: null,
-                                dataNascita: null, // NUOVO CAMPO
+                                dataNascita: null, 
                                 telefono: null,
                                 email: null,
                                 userId: null
@@ -380,10 +376,13 @@
                 console.log("Setup iniziale degli slot completato.");
 
              } catch (e) {
-                console.error("Errore durante il setup degli slot iniziali:", e);
-                showStatus("Errore durante l'inizializzazione degli orari.", true);
+                // Qui intercetta l'errore di PERMESSO
+                console.error("Errore durante il setup degli slot iniziali (Probabile errore di permessi):", e);
+                showStatus("Errore durante l'inizializzazione degli orari. Controlla le regole di sicurezza di Firestore.", true);
+                errorMessage.textContent = "Errore: Impossibile creare gli slot iniziali. Controlla le regole di sicurezza (Permesso negato).";
+                errorMessage.classList.remove('hidden');
              } finally {
-                 toggleLoading(false);
+                 // Non togliere il loading qui, onSnapshot lo farà una volta ricevuti i dati
              }
         }
 
@@ -405,7 +404,7 @@
                 
                 currentSchedule = newSchedule;
                 renderScheduleTable(newSchedule);
-                toggleLoading(false);
+                toggleLoading(false); // Nasconde l'indicatore solo dopo aver ricevuto il primo set di dati
 
             }, (error) => {
                 console.error("Errore nell'ascolto dei dati:", error);
@@ -414,7 +413,7 @@
                 toggleLoading(false);
             });
             
-            // Esegui il setup iniziale
+            // Esegui il setup iniziale subito dopo aver avviato l'ascolto
             setupInitialSlots();
         }
 
@@ -423,15 +422,15 @@
          */
         async function saveBooking(e) {
             e.preventDefault();
-            // Controlla che currentUserId sia valido
+            
             if (!selectedSlotDocId || !db || !currentUserId) {
-                 showStatus("Autenticazione fallita. Riprova o contatta l'amministratore.", true);
+                 showStatus("Autenticazione fallita o turno non selezionato.", true);
                  return;
             }
 
             const nome = document.getElementById('nome').value.trim();
             const cognome = document.getElementById('cognome').value.trim();
-            const dataNascita = document.getElementById('dataNascita').value.trim(); // NUOVO CAMPO
+            const dataNascita = document.getElementById('dataNascita').value.trim(); 
             const telefono = document.getElementById('telefono').value.trim();
             const email = document.getElementById('email').value.trim() || null;
             
@@ -445,28 +444,27 @@
             const slotRef = doc(getTimeSlotsCollection(), selectedSlotDocId);
             const timeSlotName = modalTimeSlot.textContent;
             
-            // Tentativo di prenotare o aggiornare il turno usando una transazione per l'atomicita
             try {
                 await runTransaction(db, async (transaction) => {
                     const slotDoc = await transaction.get(slotRef);
                     const slotData = slotDoc.data();
 
-                    // Se il turno è libero (o è già il mio), procedi
+                    // Verifica se lo slot è libero O se è già stato prenotato da me (per l'aggiornamento)
                     if (!slotData || !slotData.userId || slotData.userId === currentUserId) {
                         transaction.set(slotRef, {
                             timeSlot: timeSlotName,
                             nome: nome,
                             cognome: cognome,
-                            dataNascita: dataNascita, // NUOVO CAMPO SALVATO
+                            dataNascita: dataNascita, 
                             telefono: telefono,
                             email: email,
-                            userId: currentUserId // Chiama l'ID del volontario
+                            userId: currentUserId 
                         });
                         
                         showStatus("Prenotazione/Aggiornamento turno effettuato con successo!");
                         closeModal();
                     } else {
-                        // Se il turno è già occupato da qualcun altro
+                        // Slot occupato da un altro utente
                         showStatus("Errore: La fascia oraria è stata appena prenotata da un altro utente.", true);
                         throw new Error("Slot occupato");
                     }
@@ -474,9 +472,8 @@
                 
             } catch (e) {
                 console.error("Errore nella transazione di salvataggio/aggiornamento:", e);
-                // Il messaggio di errore è già mostrato sopra in caso di slot occupato
                 if (e.message !== "Slot occupato") {
-                    showStatus("Errore di rete o di sistema. Riprova.", true);
+                    showStatus("Errore di rete o di sistema. Riprova. Dettagli in console.", true);
                 }
             } finally {
                 saveBookingBtn.disabled = false;
@@ -494,7 +491,6 @@
             const slotRef = doc(getTimeSlotsCollection(), selectedSlotDocId);
             const timeSlotName = modalTimeSlot.textContent;
             
-            // Tentativo di cancellare il turno usando una transazione
             try {
                 await runTransaction(db, async (transaction) => {
                     const slotDoc = await transaction.get(slotRef);
@@ -507,7 +503,7 @@
                             timeSlot: timeSlotName,
                             nome: null,
                             cognome: null,
-                            dataNascita: null, // NUOVO CAMPO RESETTATO
+                            dataNascita: null, 
                             telefono: null,
                             email: null,
                             userId: null
@@ -524,9 +520,8 @@
                 
             } catch (e) {
                 console.error("Errore nella transazione di cancellazione:", e);
-                // Il messaggio di errore è già mostrato sopra
                 if (e.message !== "Non autorizzato o slot già libero") {
-                    showStatus("Errore di rete o di sistema durante la cancellazione. Riprova.", true);
+                    showStatus("Errore di rete o di sistema durante la cancellazione. Riprova. Dettagli in console.", true);
                 }
             } finally {
                 deleteBookingBtn.disabled = false;
@@ -544,7 +539,7 @@
             // Ordina gli slot in base all'ordine iniziale
             const sortedSlots = initialTimeSlots
                 .map(slotName => schedule[slotName])
-                .filter(slot => slot); // Filtra per assicurare che lo slot esista (dovrebbe esistere dopo setupInitialSlots)
+                .filter(slot => slot); 
 
             sortedSlots.forEach(slot => {
                 const isBooked = !!slot.nome;
@@ -555,11 +550,12 @@
                 
                 // Gestione click sulla riga
                 if (isBooked) {
-                    tr.onclick = () => openDetailsModal(slot);
-                    if (isMine) {
-                        tr.onclick = () => openModal(slot.id, slot.timeSlot); // Permette modifica/cancellazione
-                    }
+                    // Se prenotato: apre i dettagli. Se è mio, apre la modale di modifica/cancellazione
+                    tr.onclick = isMine 
+                        ? () => openModal(slot.id, slot.timeSlot)
+                        : () => openDetailsModal(slot);
                 } else {
+                    // Se libero: apre la modale di prenotazione
                     tr.onclick = () => openModal(slot.id, slot.timeSlot);
                 }
                 
