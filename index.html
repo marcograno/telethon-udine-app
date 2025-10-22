@@ -164,30 +164,25 @@
         // Imposta il livello di log (utile per il debug)
         setLogLevel('Debug');
 
-        // Variabili Globali fornite dall'ambiente Canvas (DA SOSTITUIRE con i tuoi valori reali per l'hosting esterno)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-        // **ATTENZIONE:** Se pubblichi l'app, devi sostituire le righe sopra con i valori statici
-        // della tua configurazione Firebase (API Key, Project ID, ecc.) e rimuovere la logica
-        // di autenticazione basata su token esterni come `initialAuthToken`.
-        // Ad esempio:
-        /*
-        const appId = 'Sostituisci-con-il-tuo-AppId-se-necessario';
-        const firebaseConfig = {
-            apiKey: "AIzaSy...",
-            authDomain: "tuo-progetto.firebaseapp.com",
-            projectId: "tuo-progetto",
-            storageBucket: "tuo-progetto.appspot.com",
-            messagingSenderId: "...",
-            appId: "..."
-        };
-        let auth, db;
-        let currentUserId = crypto.randomUUID(); // Usa un ID anonimo statico o gestisci l'autenticazione.
-        let isAuthReady = true; 
-        */
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyAkMMRNj0YD1D3cS1C6qjgBQSrBB8JhZTc",
+    authDomain: "telethon-dc081.firebaseapp.com",
+    projectId: "telethon-dc081",
+    storageBucket: "telethon-dc081.firebasestorage.app",
+    messagingSenderId: "592976367283",
+    appId: "1:592976367283:web:b773f920dc78da823d6ac6"
+  };
 
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
 
         let db, auth, currentUserId = null, isAuthReady = false;
         
@@ -293,9 +288,10 @@
         // --- Funzioni di Inizializzazione Firebase ---
 
         async function initFirebase() {
-            if (!firebaseConfig) {
-                console.error("Firebase config non disponibile.");
-                errorMessage.textContent = "Configurazione Firebase mancante. Impossibile avviare l'app.";
+            // Controlla che i dati di configurazione siano stati inseriti
+            if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey === "IL_TUO_API_KEY") {
+                console.error("Firebase config mancante o con placeholder.");
+                errorMessage.textContent = "Configurazione Firebase mancante. Inserisci le tue chiavi nel file index.html per avviare l'app.";
                 errorMessage.classList.remove('hidden');
                 return;
             }
@@ -310,18 +306,14 @@
                     if (user) {
                         currentUserId = user.uid;
                     } else {
-                         // Fallback: login anonimo se l'auth token non è presente o fallisce
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken).catch(e => {
-                                console.error("Errore con signInWithCustomToken, si tenta signInAnonymously:", e);
-                                signInAnonymously(auth);
-                            });
-                        } else {
-                            await signInAnonymously(auth);
-                        }
+                        // Per l'hosting esterno usiamo solo l'autenticazione anonima
+                        await signInAnonymously(auth).catch(e => {
+                            console.error("Errore con signInAnonymously:", e);
+                        });
                     }
                     
-                    document.getElementById('user-id-value').textContent = currentUserId;
+                    // Se l'autenticazione è fallita, currentUserId rimarrà null o non aggiornato, ma gestiamo la visualizzazione
+                    document.getElementById('user-id-value').textContent = currentUserId || 'Anonimo';
                     isAuthReady = true;
 
                     // Una volta autenticato, avvia l'ascolto dei dati
@@ -353,6 +345,7 @@
          * Lo fa in modo sicuro tramite un'unica transazione.
          */
         async function setupInitialSlots() {
+             // Non esegue se il database non è pronto
              if (!db || !isAuthReady) return;
              
              toggleLoading(true);
@@ -426,7 +419,11 @@
          */
         async function saveBooking(e) {
             e.preventDefault();
-            if (!selectedSlotDocId || !db || !currentUserId) return;
+            // Controlla che currentUserId sia valido
+            if (!selectedSlotDocId || !db || !currentUserId) {
+                 showStatus("Autenticazione fallita. Riprova o contatta l'amministratore.", true);
+                 return;
+            }
 
             const nome = document.getElementById('nome').value.trim();
             const cognome = document.getElementById('cognome').value.trim();
