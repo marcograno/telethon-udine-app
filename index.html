@@ -6,11 +6,24 @@
     <title>Telethon Udine 2026 - APW</title>
     <!-- Caricamento di Tailwind CSS per uno stile moderno e responsive -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Colori del logo APW: azzurro (#3b78b5) e arancione (#f39a33)
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        azzurro: { 50: '#eef4fb', 100: '#d6e5f5', 200: '#adc9ea', 300: '#84add9', 400: '#5a91c8', 500: '#3b78b5', 600: '#2f6299', 700: '#264f7c', 800: '#1e3e61' },
+                        arancio: { 50: '#fff6ec', 100: '#feead2', 200: '#fcd3a3', 300: '#f9b96e', 400: '#f6a64d', 500: '#f39a33', 600: '#d97f17', 700: '#b06512', 800: '#874d0f' }
+                    }
+                }
+            }
+        };
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f4f7f6;
+            background-color: #f3f6fa;
         }
         .container-app {
             max-width: 1200px;
@@ -23,7 +36,7 @@
             z-index: 50;
         }
         .table-header {
-            background-color: #10b981; /* Smeraldo 500 */
+            background-color: #3b78b5; /* Azzurro APW */
             color: white;
             font-weight: 700;
         }
@@ -33,14 +46,15 @@
             transition: background-color 0.2s;
         }
         .cell-available:hover {
-            background-color: #d1fae5; /* Smeraldo 100 */
+            background-color: #d6e5f5; /* Azzurro 100 */
         }
         .cell-booked-info:hover {
-            background-color: #fef3c7; /* Giallo 100 per indicare modifica */
+            background-color: #feead2; /* Arancio 100 per indicare modifica */
         }
         .day-row td {
-            background-color: #ecfdf5; /* Smeraldo 50 */
-            color: #047857;
+            background-color: #fff6ec; /* Arancio 50 */
+            border-left: 4px solid #f39a33; /* Arancione APW */
+            color: #b06512;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.03em;
@@ -53,14 +67,16 @@
 <body class="min-h-screen">
 
     <div class="container-app">
-        <header class="py-6 px-4 mb-6 bg-white shadow-lg rounded-xl">
+        <header class="pb-6 px-4 mb-6 bg-white shadow-lg rounded-xl overflow-hidden">
+            <!-- Fascia con i colori APW -->
+            <div class="-mx-4 h-2 mb-6 bg-gradient-to-r from-azzurro-500 to-arancio-500"></div>
             <!-- Loghi -->
             <div class="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 mb-5">
                 <img src="img/logo-telethon-udine.png" alt="Comitato Udinese Staffette Telethon" class="h-16 sm:h-20 w-auto">
                 <img src="img/logo-apw.jpg" alt="Associazione Persone Williams Italia" class="h-16 sm:h-20 w-auto">
             </div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-center text-gray-800">
-                <span class="text-emerald-500">TELETHON UDINE 2026 - SQUADRA APW</span>
+                <span class="text-azzurro-600">TELETHON UDINE 2026 - </span><span class="text-arancio-600">SQUADRA APW</span>
             </h1>
             <p class="mt-2 text-center text-gray-600">Dalle ore 15.00 di SABATO 5 DICEMBRE alle ore 15.00 di DOMENICA 6 DICEMBRE</p>
         </header>
@@ -83,7 +99,7 @@
                 </tbody>
             </table>
 
-            <div id="loading-indicator" class="text-center py-8 text-lg font-semibold text-emerald-600 hidden">
+            <div id="loading-indicator" class="text-center py-8 text-lg font-semibold text-azzurro-600 hidden">
                 Caricamento dati in corso...
             </div>
              <div id="error-message" class="text-center py-8 text-lg font-semibold text-red-600 hidden">
@@ -92,14 +108,14 @@
         </div>
 
         <!-- Messaggio di benvenuto pre-login -->
-        <div id="pre-login-message" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg shadow-lg mt-8 text-center" role="alert">
+        <div id="pre-login-message" class="bg-arancio-50 border-l-4 border-arancio-500 text-arancio-800 p-4 rounded-lg shadow-lg mt-8 text-center" role="alert">
             <p class="font-bold">Accesso Obbligatorio</p>
             <p>Per visualizzare e prenotare i turni, effettua l'accesso.</p>
         </div>
 
 
         <!-- Messaggi -->
-        <div id="status-message" class="fixed bottom-4 right-4 bg-emerald-500 text-white p-3 rounded-lg shadow-xl hidden transition-opacity duration-300"></div>
+        <div id="status-message" class="fixed bottom-4 right-4 bg-azzurro-500 text-white p-3 rounded-lg shadow-xl hidden transition-opacity duration-300"></div>
     </div>
 
     <!-- ========================================================================= -->
@@ -107,19 +123,19 @@
     <!-- ========================================================================= -->
     <div id="login-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm p-6 rounded-xl shadow-2xl transform transition-all scale-100" role="dialog" aria-modal="true" aria-labelledby="login-title">
-            <h2 id="login-title" class="text-2xl font-bold mb-6 text-emerald-600">Accesso Iscrizioni</h2>
+            <h2 id="login-title" class="text-2xl font-bold mb-6 text-azzurro-600">Accesso Iscrizioni</h2>
 
             <form id="login-form">
 
                  <div class="mb-6">
                     <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password condivisa *</label>
-                    <input type="password" id="login-password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    <input type="password" id="login-password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-azzurro-500 focus:border-azzurro-500">
                 </div>
 
                 <p id="login-error-message" class="text-red-500 text-sm mb-4 hidden">Password non valida. Riprova.</p>
 
                 <div class="flex justify-end">
-                    <button type="submit" id="login-btn" class="w-full px-4 py-3 text-lg font-medium text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 transition disabled:bg-emerald-300">
+                    <button type="submit" id="login-btn" class="w-full px-4 py-3 text-lg font-medium text-white bg-azzurro-500 rounded-lg hover:bg-azzurro-600 transition disabled:bg-azzurro-300">
                         Accedi
                     </button>
                 </div>
@@ -133,39 +149,39 @@
 
     <div id="booking-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 hidden">
         <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-2xl transform transition-all scale-100 max-h-full overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-            <h2 id="modal-title" class="text-2xl font-bold mb-1 text-gray-800">Prenota/Modifica Turno <span id="modal-time-slot" class="text-emerald-500"></span></h2>
+            <h2 id="modal-title" class="text-2xl font-bold mb-1 text-gray-800">Prenota/Modifica Turno <span id="modal-time-slot" class="text-arancio-600"></span></h2>
             <p id="modal-day" class="text-sm text-gray-500 mb-4"></p>
 
             <form id="booking-form">
                 <div class="mb-4">
                     <label for="nome" class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
-                    <input type="text" id="nome" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    <input type="text" id="nome" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-azzurro-500 focus:border-azzurro-500">
                 </div>
                  <div class="mb-4">
                     <label for="cognome" class="block text-sm font-medium text-gray-700 mb-1">Cognome *</label>
-                    <input type="text" id="cognome" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    <input type="text" id="cognome" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-azzurro-500 focus:border-azzurro-500">
                 </div>
                 <!-- CAMPO: Data di Nascita (Con limitazioni min/max impostate da JS) -->
                 <div class="mb-4">
                     <label for="dataNascita" class="block text-sm font-medium text-gray-700 mb-1">Data di Nascita *</label>
-                    <input type="date" id="dataNascita" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    <input type="date" id="dataNascita" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-azzurro-500 focus:border-azzurro-500">
                     <p id="dataNascita-error" class="text-red-500 text-xs mt-1 hidden">La data di nascita non è valida.</p>
                 </div>
                 <!-- FINE CAMPO -->
                 <div class="mb-4">
                     <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Numero di Telefono *</label>
-                    <input type="tel" id="telefono" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    <input type="tel" id="telefono" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-azzurro-500 focus:border-azzurro-500">
                 </div>
                 <div class="mb-6">
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                    <input type="email" id="email" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                    <input type="email" id="email" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-azzurro-500 focus:border-azzurro-500">
                 </div>
 
                 <div class="flex justify-end space-x-3">
                     <button type="button" id="close-modal-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
                         Annulla
                     </button>
-                    <button type="submit" id="save-booking-btn" class="px-4 py-2 text-sm font-medium text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 transition disabled:bg-emerald-300">
+                    <button type="submit" id="save-booking-btn" class="px-4 py-2 text-sm font-medium text-white bg-azzurro-500 rounded-lg hover:bg-azzurro-600 transition disabled:bg-azzurro-300">
                         Prenota Ora
                     </button>
                 </div>
@@ -280,7 +296,7 @@
 
         function showStatus(message, isError = false) {
             statusMessage.textContent = message;
-            statusMessage.className = `fixed bottom-4 right-4 p-3 rounded-lg shadow-xl text-white transition-opacity duration-300 ${isError ? 'bg-red-500' : 'bg-emerald-500'}`;
+            statusMessage.className = `fixed bottom-4 right-4 p-3 rounded-lg shadow-xl text-white transition-opacity duration-300 ${isError ? 'bg-red-500' : 'bg-azzurro-500'}`;
             statusMessage.classList.remove('hidden');
             statusMessage.style.opacity = '1';
             setTimeout(() => {
@@ -628,8 +644,8 @@
                 tr.onclick = () => openModal(slot.id, slot.timeSlot);
 
                 const availabilityText = isBooked
-                    ? `<span class="inline-flex items-center text-red-700"><span data-lucide="lock" class="w-4 h-4 mr-1"></span> Occupato</span>`
-                    : `<span class="inline-flex items-center text-emerald-700"><span data-lucide="check-circle" class="w-4 h-4 mr-1"></span> LIBERO</span>`;
+                    ? `<span class="inline-flex items-center text-arancio-700"><span data-lucide="lock" class="w-4 h-4 mr-1"></span> Occupato</span>`
+                    : `<span class="inline-flex items-center text-azzurro-700"><span data-lucide="check-circle" class="w-4 h-4 mr-1"></span> LIBERO</span>`;
 
                 const volunteerName = isBooked
                     ? `<span class="text-gray-800">${escapeHtml(slot.nome)} ${escapeHtml(slot.cognome)}</span>`
