@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telethon Udine 2025 - APW</title>
+    <title>Telethon Udine 2026 - APW</title>
     <!-- Caricamento di Tailwind CSS per uno stile moderno e responsive -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f4f7f6;
@@ -38,19 +38,31 @@
         .cell-booked-info:hover {
             background-color: #fef3c7; /* Giallo 100 per indicare modifica */
         }
+        .day-row td {
+            background-color: #ecfdf5; /* Smeraldo 50 */
+            color: #047857;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            font-size: 0.75rem;
+        }
     </style>
     <!-- Icone Lucide -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
 <body class="min-h-screen">
 
     <div class="container-app">
-        <header class="py-6 mb-6 bg-white shadow-lg rounded-xl">
-            <h1 class="text-3xl font-extrabold text-center text-gray-800">
-                <span class="text-emerald-500">TELETHON UDINE 2025 - SQUADRA APW</span>
+        <header class="py-6 px-4 mb-6 bg-white shadow-lg rounded-xl">
+            <!-- Loghi -->
+            <div class="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 mb-5">
+                <img src="img/logo-telethon-udine.png" alt="Comitato Udinese Staffette Telethon" class="h-16 sm:h-20 w-auto">
+                <img src="img/logo-apw.jpg" alt="Associazione Persone Williams Italia" class="h-16 sm:h-20 w-auto">
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-center text-gray-800">
+                <span class="text-emerald-500">TELETHON UDINE 2026 - SQUADRA APW</span>
             </h1>
-            <p class="mt-2 text-center text-gray-600">Dalle ore 15.00 di SABATO 29 NOVEMBRE alle ore 15.00 di DOMENICA 30 NOVEMBRE</p>
-             <!-- Rimosso l'elemento con l'ID utente -->
+            <p class="mt-2 text-center text-gray-600">Dalle ore 15.00 di SABATO 5 DICEMBRE alle ore 15.00 di DOMENICA 6 DICEMBRE</p>
         </header>
 
         <!-- Area della Tabella -->
@@ -78,7 +90,7 @@
                 Errore durante il caricamento dei dati. Controlla la console.
             </div>
         </div>
-        
+
         <!-- Messaggio di benvenuto pre-login -->
         <div id="pre-login-message" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg shadow-lg mt-8 text-center" role="alert">
             <p class="font-bold">Accesso Obbligatorio</p>
@@ -89,16 +101,16 @@
         <!-- Messaggi -->
         <div id="status-message" class="fixed bottom-4 right-4 bg-emerald-500 text-white p-3 rounded-lg shadow-xl hidden transition-opacity duration-300"></div>
     </div>
-    
+
     <!-- ========================================================================= -->
     <!-- MODALE DI LOGIN -->
     <!-- ========================================================================= -->
     <div id="login-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm p-6 rounded-xl shadow-2xl transform transition-all scale-100" role="dialog" aria-modal="true" aria-labelledby="login-title">
             <h2 id="login-title" class="text-2xl font-bold mb-6 text-emerald-600">Accesso Iscrizioni</h2>
-            
+
             <form id="login-form">
-                
+
                  <div class="mb-6">
                     <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password condivisa *</label>
                     <input type="password" id="login-password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
@@ -114,14 +126,15 @@
             </form>
         </div>
     </div>
-    
+
     <!-- ========================================================================= -->
-    <!-- MODALE DI PRENOTAZIONE/MODIFICA (Rimosso Dettagli, Modale unica) -->
+    <!-- MODALE DI PRENOTAZIONE/MODIFICA -->
     <!-- ========================================================================= -->
 
     <div id="booking-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 hidden">
-        <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-2xl transform transition-all scale-100" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-            <h2 id="modal-title" class="text-2xl font-bold mb-4 text-gray-800">Prenota/Modifica Turno <span id="modal-time-slot" class="text-emerald-500"></span></h2>
+        <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-2xl transform transition-all scale-100 max-h-full overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <h2 id="modal-title" class="text-2xl font-bold mb-1 text-gray-800">Prenota/Modifica Turno <span id="modal-time-slot" class="text-emerald-500"></span></h2>
+            <p id="modal-day" class="text-sm text-gray-500 mb-4"></p>
 
             <form id="booking-form">
                 <div class="mb-4">
@@ -136,7 +149,7 @@
                 <div class="mb-4">
                     <label for="dataNascita" class="block text-sm font-medium text-gray-700 mb-1">Data di Nascita *</label>
                     <input type="date" id="dataNascita" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
-                    <p id="dataNascita-error" class="text-red-500 text-xs mt-1 hidden">L'anno deve essere compreso tra il 1930 e il 2025.</p>
+                    <p id="dataNascita-error" class="text-red-500 text-xs mt-1 hidden">La data di nascita non è valida.</p>
                 </div>
                 <!-- FINE CAMPO -->
                 <div class="mb-4">
@@ -171,19 +184,15 @@
         // Importa le funzioni necessarie di Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, query, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // Imposta il livello di log (utile per il debug)
-        setLogLevel('Debug');
+        import { getFirestore, doc, onSnapshot, collection, query, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==============================================================================
         // ==============================================================================
         // INIZIO CONFIGURAZIONE FIREBASE ESTERNA (OBBLIGATORIA)
-        
+
         // 1. Definisci il tuo App ID (DEVE essere il Project ID di Firebase per le collezioni pubbliche)
         const appId = 'telethon-dc081'; // ID del progetto Firebase
-        
+
         // 2. Oggetto di configurazione Firebase completo:
         const firebaseConfig = {
             apiKey: "AIzaSyAkMMRNj0YD1D3cS1C6qjgBQSrBB8JhZTc",
@@ -193,36 +202,47 @@
             messagingSenderId: "592976367283",
             appId: "1:592976367283:web:b773f920dc78da823d6ac6"
         };
-        
+
         // 3. Email fissa per l'accesso condiviso dei volontari
         const SHARED_VOLUNTEER_EMAIL = 'volontari@apw.it';
-        
+
+        // 4. Collezione dei turni di quest'anno (quella del 2025 era 'time_slots' e resta intatta)
+        const SLOTS_COLLECTION = 'time_slots_2026';
+
         // ==============================================================================
         // ==============================================================================
 
         let db, auth, currentUserId = null, isAuthReady = false;
-        
+
         // Dati iniziali (fasce orarie)
         const initialTimeSlots = [
-            "15-16", "16-17", "17-18", "18-19", "19-20", "20-21", "21-22", "22-23", 
-            "23-24", "24-1", "1-2", "2-3", "3-4", "4-5", "5-6", "6-7", "7-8", 
+            "15-16", "16-17", "17-18", "18-19", "19-20", "20-21", "21-22", "22-23",
+            "23-24", "24-1", "1-2", "2-3", "3-4", "4-5", "5-6", "6-7", "7-8",
             "8-9", "9-10", "10-11", "11-12", "12-13", "13-14", "14-15"
         ];
-        
+
+        // Giorno di ciascuna fascia: fino a "23-24" è sabato, da "24-1" in poi domenica
+        const DAY_SATURDAY = 'Sabato 5 dicembre';
+        const DAY_SUNDAY = 'Domenica 6 dicembre';
+        function dayOfSlot(slotName) {
+            return initialTimeSlots.indexOf(slotName) < initialTimeSlots.indexOf("24-1") ? DAY_SATURDAY : DAY_SUNDAY;
+        }
+
         // Stato locale per memorizzare i dati dei turni
         let currentSchedule = {};
-        
+
         // Elementi DOM
-        const scheduleContainer = document.getElementById('schedule-container'); 
-        const preLoginMessage = document.getElementById('pre-login-message');   
-        const loginModal = document.getElementById('login-modal');             
-        const loginForm = document.getElementById('login-form');               
-        const loginErrorMsg = document.getElementById('login-error-message');  
-        
+        const scheduleContainer = document.getElementById('schedule-container');
+        const preLoginMessage = document.getElementById('pre-login-message');
+        const loginModal = document.getElementById('login-modal');
+        const loginForm = document.getElementById('login-form');
+        const loginErrorMsg = document.getElementById('login-error-message');
+
         const scheduleBody = document.getElementById('schedule-body');
         const bookingModal = document.getElementById('booking-modal');
         const bookingForm = document.getElementById('booking-form');
         const modalTimeSlot = document.getElementById('modal-time-slot');
+        const modalDay = document.getElementById('modal-day');
         const saveBookingBtn = document.getElementById('save-booking-btn');
         const deleteBookingBtn = document.getElementById('delete-booking-btn');
         const loadingIndicator = document.getElementById('loading-indicator');
@@ -230,11 +250,10 @@
         const statusMessage = document.getElementById('status-message');
         const dataNascitaInput = document.getElementById('dataNascita');
         const dataNascitaError = document.getElementById('dataNascita-error');
-        
+
         let selectedSlotDocId = null;
 
         // --- Variabili di Validazione Data ---
-        // Limiti basati sull'anno 2025 (prossimo evento) e 1930 (limite storico ragionevole)
         const MIN_DATE = '1930-01-01';
         const MAX_DATE = (new Date()).toISOString().split('T')[0]; // Data di oggi come limite massimo
 
@@ -245,9 +264,23 @@
 
         // --- Funzioni di Utilità ---
 
+        // Evita che il testo inserito dagli utenti venga interpretato come HTML
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[c]);
+        }
+
+        // Mostra la data di nascita nel formato gg/mm/aaaa
+        function formatDate(isoDate) {
+            if (!isoDate) return '-';
+            const [y, m, d] = isoDate.split('-');
+            return d && m && y ? `${d}/${m}/${y}` : isoDate;
+        }
+
         function showStatus(message, isError = false) {
             statusMessage.textContent = message;
-            statusMessage.className = `fixed bottom-4 right-4 p-3 rounded-lg shadow-xl transition-opacity duration-300 ${isError ? 'bg-red-500' : 'bg-emerald-500'}`;
+            statusMessage.className = `fixed bottom-4 right-4 p-3 rounded-lg shadow-xl text-white transition-opacity duration-300 ${isError ? 'bg-red-500' : 'bg-emerald-500'}`;
             statusMessage.classList.remove('hidden');
             statusMessage.style.opacity = '1';
             setTimeout(() => {
@@ -261,9 +294,8 @@
             errorMessage.classList.add('hidden');
             scheduleBody.classList.toggle('opacity-50', show);
         }
-        
-        // LOGICA MODIFICATA: L'APERTURA della modale non è più basata sulla proprietà utente,
-        // ma solo sullo stato occupato/libero e l'utente può sempre modificare.
+
+        // Tutti i turni (liberi o occupati) aprono la modale: l'utente può sempre prenotare o modificare
         function openModal(docId, timeSlot) {
             if (!currentUserId) {
                  showStatus("Devi prima accedere per prenotare un turno.", true);
@@ -272,9 +304,10 @@
 
             selectedSlotDocId = docId;
             modalTimeSlot.textContent = timeSlot;
+            modalDay.textContent = dayOfSlot(docId);
 
             const slotData = currentSchedule[docId];
-            
+
             bookingForm.reset();
             dataNascitaError.classList.add('hidden');
             deleteBookingBtn.classList.add('hidden');
@@ -285,19 +318,14 @@
                 // Pre-compila i dati se il turno è occupato
                 document.getElementById('nome').value = slotData.nome || '';
                 document.getElementById('cognome').value = slotData.cognome || '';
-                document.getElementById('dataNascita').value = slotData.dataNascita || ''; 
+                document.getElementById('dataNascita').value = slotData.dataNascita || '';
                 document.getElementById('telefono').value = slotData.telefono || '';
                 document.getElementById('email').value = slotData.email || '';
-                
+
                 saveBookingBtn.textContent = 'Aggiorna Dati';
                 deleteBookingBtn.classList.remove('hidden');
-                
-            } else {
-                // Se libero, resetta i campi per la nuova prenotazione
-                saveBookingBtn.textContent = 'Prenota Ora';
-                deleteBookingBtn.classList.add('hidden');
             }
-            
+
             bookingModal.classList.remove('hidden');
         }
 
@@ -306,25 +334,24 @@
             selectedSlotDocId = null;
         }
 
-        
+
         // --- Funzione di Login con password condivisa ---
         async function handleLogin(e) {
             e.preventDefault();
-            
+
             // L'email è fissa e condivisa
-            const email = SHARED_VOLUNTEER_EMAIL; 
+            const email = SHARED_VOLUNTEER_EMAIL;
             const password = document.getElementById('login-password').value;
             const loginBtn = document.getElementById('login-btn');
-            
+
             loginErrorMsg.classList.add('hidden');
             loginBtn.disabled = true;
 
             try {
-                // Tentativo di accesso con email fissa e password condivisa
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                await signInWithEmailAndPassword(auth, email, password);
                 loginModal.classList.add('hidden');
                 showStatus("Accesso effettuato con successo!");
-                
+
             } catch (error) {
                 console.error("Errore di accesso:", error);
                 loginErrorMsg.textContent = "Password non valida. Riprova.";
@@ -332,11 +359,11 @@
                 loginBtn.disabled = false;
             }
         }
-        
+
         function onLoginSuccess(user) {
             // Poiché l'account è condiviso, currentUserId sarà sempre lo stesso
-            currentUserId = user.uid; 
-            
+            currentUserId = user.uid;
+
             scheduleContainer.classList.remove('hidden');
             preLoginMessage.classList.add('hidden');
             loginModal.classList.add('hidden');
@@ -370,7 +397,7 @@
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
-                
+
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         onLoginSuccess(user);
@@ -387,23 +414,23 @@
         }
 
         // --- Funzioni di Interazione con Firestore ---
-        
+
         function getTimeSlotsCollection() {
-             return collection(db, 'artifacts', appId, 'public', 'data', 'time_slots');
+             return collection(db, 'artifacts', appId, 'public', 'data', SLOTS_COLLECTION);
         }
 
         async function setupInitialSlots() {
              if (!db || !currentUserId) {
-                 return; 
+                 return;
              }
-             
+
              toggleLoading(true);
 
              try {
                 const slotsRef = getTimeSlotsCollection();
                 const setupPromises = initialTimeSlots.map(slot => {
                     const docRef = doc(slotsRef, slot);
-                    
+
                     return runTransaction(db, async (transaction) => {
                         const slotDoc = await transaction.get(docRef);
 
@@ -427,7 +454,7 @@
                 showStatus("Errore durante l'inizializzazione degli orari. Controlla le regole di sicurezza di Firestore.", true);
                 errorMessage.textContent = "Errore: Impossibile creare gli slot iniziali. Controlla le regole di sicurezza (Permesso negato).";
                 errorMessage.classList.remove('hidden');
-             } 
+             }
         }
 
         function startListeningToSchedule() {
@@ -435,16 +462,16 @@
             toggleLoading(true);
 
             const q = query(getTimeSlotsCollection());
-            
+
             onSnapshot(q, (snapshot) => {
                 const newSchedule = {};
                 snapshot.forEach((doc) => {
                     newSchedule[doc.id] = { id: doc.id, ...doc.data() };
                 });
-                
+
                 currentSchedule = newSchedule;
                 renderScheduleTable(newSchedule);
-                toggleLoading(false); 
+                toggleLoading(false);
 
             }, (error) => {
                 console.error("Errore nell'ascolto dei dati:", error);
@@ -452,23 +479,23 @@
                 errorMessage.classList.remove('hidden');
                 toggleLoading(false);
             });
-            
+
             setupInitialSlots();
         }
-        
+
         // Funzione di validazione data
         function validateDateOfBirth(dateStr) {
             const date = new Date(dateStr);
             const min = new Date(MIN_DATE);
             const max = new Date(MAX_DATE);
-            
+
             // Controlla se l'input è valido e rientra nei limiti
             return dateStr && date >= min && date <= max;
         }
 
         async function saveBooking(e) {
             e.preventDefault();
-            
+
             if (!selectedSlotDocId || !db || !currentUserId) {
                  showStatus("Accesso non valido. Effettua nuovamente l'accesso.", true);
                  return;
@@ -476,55 +503,50 @@
 
             const nome = document.getElementById('nome').value.trim();
             const cognome = document.getElementById('cognome').value.trim();
-            const dataNascita = dataNascitaInput.value.trim(); 
+            const dataNascita = dataNascitaInput.value.trim();
             const telefono = document.getElementById('telefono').value.trim();
-            const email = document.getElementById('email').value.trim(); 
-            
+            const email = document.getElementById('email').value.trim();
+
             if (!nome || !cognome || !dataNascita || !telefono || !email) {
                 showStatus("Per favore, compila tutti i campi obbligatori.", true);
                 return;
             }
 
-            // Validazione aggiunta per la data di nascita
             if (!validateDateOfBirth(dataNascita)) {
                 dataNascitaError.classList.remove('hidden');
                 showStatus("Errore: la data di nascita inserita non è valida.", true);
                 return;
             }
-            dataNascitaError.classList.add('hidden'); // Nasconde l'errore se la validazione va a buon fine
+            dataNascitaError.classList.add('hidden');
 
             saveBookingBtn.disabled = true;
 
             const slotRef = doc(getTimeSlotsCollection(), selectedSlotDocId);
             const timeSlotName = modalTimeSlot.textContent;
-            
+
             try {
                 await runTransaction(db, async (transaction) => {
-                    const slotDoc = await transaction.get(slotRef);
-                    const slotData = slotDoc.data();
+                    await transaction.get(slotRef);
 
-                    // Non c'è più il controllo di proprietà. Chiunque autenticato può prenotare/aggiornare.
+                    // Nessun controllo di proprietà: chiunque autenticato può prenotare/aggiornare.
                     transaction.set(slotRef, {
                         timeSlot: timeSlotName,
                         nome: nome,
                         cognome: cognome,
-                        dataNascita: dataNascita, 
+                        dataNascita: dataNascita,
                         telefono: telefono,
-                        email: email, 
-                        // Manteniamo l'ID utente per coerenza dei dati, ma non viene usato per l'autorizzazione
-                        userId: currentUserId 
+                        email: email,
+                        userId: currentUserId
                     });
-                    
-                    showStatus("Prenotazione/Aggiornamento turno effettuato con successo!");
-                    closeModal();
-                    
                 });
-                
+
+                showStatus("Prenotazione/Aggiornamento turno effettuato con successo!");
+                closeModal();
+
             } catch (e) {
                 console.error("Errore nella transazione di salvataggio/aggiornamento:", e);
-                // Rimosso il controllo "Slot occupato" perché la transazione ora permette l'overwrite
                 showStatus("Errore di rete o di sistema. Riprova. Dettagli in console.", true);
-                
+
             } finally {
                 saveBookingBtn.disabled = false;
             }
@@ -533,43 +555,41 @@
         async function deleteBooking() {
             if (!selectedSlotDocId || !db || !currentUserId) return;
 
-            // Chiedi conferma all'utente (simulazione)
-            // Poiché non possiamo usare `confirm()`, procediamo direttamente come richiesto.
-            // In un'app reale si userebbe un modale di conferma.
-            
+            if (!confirm(`Vuoi davvero cancellare la prenotazione del turno ${modalTimeSlot.textContent}?`)) return;
+
             deleteBookingBtn.disabled = true;
-            
+
             const slotRef = doc(getTimeSlotsCollection(), selectedSlotDocId);
             const timeSlotName = modalTimeSlot.textContent;
-            
+
             try {
                 await runTransaction(db, async (transaction) => {
                     const slotDoc = await transaction.get(slotRef);
                     const slotData = slotDoc.data();
 
-                    // Se lo slot è occupato (da chiunque), lo si può cancellare (come richiesto)
+                    // Se lo slot è occupato (da chiunque), lo si può cancellare
                     if (slotData && slotData.nome) {
                         transaction.set(slotRef, {
                             timeSlot: timeSlotName,
                             nome: null,
                             cognome: null,
-                            dataNascita: null, 
+                            dataNascita: null,
                             telefono: null,
                             email: null,
-                            userId: null // Resetta anche l'ID utente
+                            userId: null
                         });
-                        
-                        showStatus("Prenotazione annullata con successo.");
-                        closeModal();
                     } else {
-                        // Se è già libero, non fare nulla e mostra un messaggio
-                         showStatus("Errore: Il turno risulta già libero.", true);
-                         throw new Error("Slot già libero");
+                        throw new Error("Slot già libero");
                     }
                 });
-                
+
+                showStatus("Prenotazione annullata con successo.");
+                closeModal();
+
             } catch (e) {
-                if (e.message !== "Slot già libero") {
+                if (e.message === "Slot già libero") {
+                    showStatus("Errore: Il turno risulta già libero.", true);
+                } else {
                     console.error("Errore nella transazione di cancellazione:", e);
                     showStatus("Errore di rete o di sistema durante la cancellazione. Riprova. Dettagli in console.", true);
                 }
@@ -579,56 +599,66 @@
         }
 
         // --- Rendering e Logica UI ---
-        
+
         function renderScheduleTable(schedule) {
             scheduleBody.innerHTML = '';
-            
+
             const sortedSlots = initialTimeSlots
                 .map(slotName => schedule[slotName])
-                .filter(slot => slot); 
+                .filter(slot => slot);
+
+            let lastDay = null;
 
             sortedSlots.forEach(slot => {
-                const isBooked = !!slot.nome;
-                
-                const tr = document.createElement('tr');
-                // Tutti i turni (liberi o occupati) sono trattati come cliccabili per la prenotazione/modifica
-                tr.className = `border-b border-gray-100 transition duration-150 ${isBooked ? 'cell-booked-info' : 'cell-available hover:shadow-md'}`;
-                
-                tr.onclick = () => openModal(slot.id, slot.timeSlot); // Apri sempre la modale
+                // Riga di intestazione quando cambia il giorno
+                const day = dayOfSlot(slot.id);
+                if (day !== lastDay) {
+                    lastDay = day;
+                    const dayTr = document.createElement('tr');
+                    dayTr.className = 'day-row';
+                    dayTr.innerHTML = `<td class="px-3 py-2" colspan="6">${day}</td>`;
+                    scheduleBody.appendChild(dayTr);
+                }
 
-                
-                const availabilityText = isBooked 
+                const isBooked = !!slot.nome;
+
+                const tr = document.createElement('tr');
+                tr.className = `border-b border-gray-100 transition duration-150 ${isBooked ? 'cell-booked-info' : 'cell-available hover:shadow-md'}`;
+
+                tr.onclick = () => openModal(slot.id, slot.timeSlot);
+
+                const availabilityText = isBooked
                     ? `<span class="inline-flex items-center text-red-700"><span data-lucide="lock" class="w-4 h-4 mr-1"></span> Occupato</span>`
                     : `<span class="inline-flex items-center text-emerald-700"><span data-lucide="check-circle" class="w-4 h-4 mr-1"></span> LIBERO</span>`;
-                    
-                const volunteerName = isBooked 
-                    ? `<span class="text-gray-800">${slot.nome} ${slot.cognome || ''}</span>`
+
+                const volunteerName = isBooked
+                    ? `<span class="text-gray-800">${escapeHtml(slot.nome)} ${escapeHtml(slot.cognome)}</span>`
                     : `<span class="text-gray-400 italic">Clicca per prenotare</span>`;
 
                 tr.innerHTML = `
-                    <td class="p-3 font-semibold text-gray-800">${slot.timeSlot}</td>
+                    <td class="p-3 font-semibold text-gray-800">${escapeHtml(slot.timeSlot)}</td>
                     <td class="p-3 hidden sm:table-cell">${availabilityText}</td>
                     <td class="p-3">${volunteerName}</td>
-                    <td class="p-3 hidden md:table-cell">${isBooked ? slot.dataNascita || '-' : '-'}</td>
-                    <td class="p-3 hidden lg:table-cell">${isBooked ? slot.telefono : '-'}</td>
-                    <td class="p-3 hidden xl:table-cell">${isBooked ? slot.email || '-' : '-'}</td>
+                    <td class="p-3 hidden md:table-cell">${isBooked ? formatDate(escapeHtml(slot.dataNascita)) : '-'}</td>
+                    <td class="p-3 hidden lg:table-cell">${isBooked ? escapeHtml(slot.telefono) : '-'}</td>
+                    <td class="p-3 hidden xl:table-cell">${isBooked ? escapeHtml(slot.email) || '-' : '-'}</td>
                 `;
-                
+
                 scheduleBody.appendChild(tr);
             });
-            
+
             lucide.createIcons();
         }
 
         // --- Event Listeners ---
 
         document.getElementById('close-modal-btn').addEventListener('click', closeModal);
-        
+
         bookingForm.addEventListener('submit', saveBooking);
         deleteBookingBtn.addEventListener('click', deleteBooking);
-        
+
         loginForm.addEventListener('submit', handleLogin);
-        
+
         // Inizializza l'applicazione all'avvio
         initFirebase();
     </script>
